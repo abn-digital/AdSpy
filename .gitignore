@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Chromium browser cache
+chromium-browser/
+.cache/
+# But include a placeholder for the directory
+!chromium-browser/.gitkeep
+
+# Electron build output
+dist/
+out/
+build/
+
+# Development
+.env
+.env.local
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+temp/
+tmp/

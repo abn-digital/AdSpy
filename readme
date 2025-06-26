@@ -1,0 +1,288 @@
+## Installation
+
+1. Create a new directory for your project:
+```bash
+mkdir ads-transparency-tool
+cd ads-transparency-tool
+```
+
+2. Create the scripts directory:
+```bash
+mkdir scripts
+```
+
+3. Create all the files provided:
+   - package.json
+   - main.js
+   - preload.js
+   - index.html
+   - renderer.js
+   - screenshotCapture.js
+   - .puppeteerrc.cjs (NOTE: Don't forget the dot!)
+   - .gitignore
+   - scripts/setup-chromium.js
+   - scripts/fix-chromium.js
+   - scripts/ensure-chromium.js
+   -# Ads Transparency Screenshot Tool
+
+A desktop application built with Electron that captures screenshots from Facebook and Google Ads Transparency Centers.
+
+## Features
+
+- 🎯 Support for both Facebook and Google Ads Transparency Centers
+- 🌍 Multiple country/region selection
+- 📸 Automated screenshot capture of all visible ads
+- 📦 ZIP file generation with all captured screenshots
+- 💾 Easy download functionality
+- 🖥️ Clean, modern UI
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+
+## Installation
+
+1. Create a new directory for your project:
+```bash
+mkdir ads-transparency-tool
+cd ads-transparency-tool
+```
+
+2. Create the scripts directory:
+```bash
+mkdir scripts
+```
+
+3. Create all the files provided:
+   - package.json
+   - main.js
+   - preload.js
+   - index.html
+   - renderer.js
+   - screenshotCapture.js
+   - .puppeteerrc.cjs
+   - .gitignore
+   - scripts/setup-chromium.js
+   - scripts/fix-chromium.js
+
+4. Install dependencies:
+```bash
+npm install
+```
+
+5. **IMPORTANT**: Fix Chromium installation location:
+```bash
+npm run fix-chromium
+```
+
+This ensures Chromium is installed in your project folder, not globally.
+
+## Complete Workflow
+
+### Development Setup (First Time)
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Download Chromium to project
+npm run fix-chromium
+
+# 3. Test the setup
+npm run test-setup
+
+# 4. Start the app
+npm start
+```
+
+### Moving to Another Computer
+```bash
+# Option 1: If chromium-browser folder was copied
+npm install
+npm start
+
+# Option 2: If chromium-browser folder is missing
+npm install
+npm run fix-chromium
+npm start
+```
+
+### Building for Distribution
+```bash
+# For Windows only
+npm run package-win
+
+# For all platforms
+npm run package-all
+```
+
+The app will automatically download Chromium if it's missing when you run it!
+
+## First Time Setup
+
+After cloning or downloading this project:
+
+1. Create the `scripts` directory:
+```bash
+mkdir scripts
+```
+
+2. Add all provided files to their respective locations
+
+3. Run the installation:
+```bash
+npm install
+```
+
+This will:
+- Install all dependencies
+- Download Chromium browser (~150MB)
+- Set up the project for development
+
+## Windows Quick Start
+
+For Windows users, here's the complete setup:
+
+1. **Open PowerShell or Command Prompt** in your desired folder
+
+2. **Create project and folders**:
+```cmd
+mkdir ads-transparency-tool
+cd ads-transparency-tool
+mkdir scripts
+```
+
+3. **Create all the provided files** in their respective locations
+
+4. **Install dependencies**:
+```cmd
+npm install
+```
+
+5. **Fix Chromium location** (IMPORTANT):
+```cmd
+npm run fix-chromium
+```
+
+6. **Verify installation**: You should now have a `chromium-browser` folder in your project
+
+7. **Run the app**:
+```cmd
+npm start
+```
+
+## Usage
+
+1. **Launch the application**
+2. **Select a platform** (Facebook or Google)
+3. **Choose a country/region** from the dropdown
+4. **Enter the advertiser information**:
+   - For Facebook: Enter the page name or full Facebook URL
+   - For Google: Enter the domain name or website URL
+5. **Set maximum screenshots** (1-100, default is 50)
+6. **Click "Capture Screenshots"** and wait for the process to complete
+7. **Download the ZIP file** containing all captured screenshots
+
+## File Structure
+
+```
+ads-transparency-tool/
+├── package.json          # Project configuration and dependencies
+├── main.js              # Electron main process
+├── preload.js           # Preload script for IPC
+├── index.html           # Application UI
+├── renderer.js          # Renderer process logic
+├── screenshotCapture.js # Puppeteer screenshot logic
+├── .puppeteerrc.cjs     # Puppeteer configuration (NOTE: starts with dot!)
+├── .gitignore           # Git ignore file
+├── QUICK_START.md       # User guide
+├── scripts/             # Setup scripts directory
+│   ├── setup-chromium.js
+│   ├── fix-chromium.js
+│   ├── ensure-chromium.js
+│   └── test-setup.js
+├── chromium-browser/    # Bundled Chromium (created after fix-chromium)
+└── README.md            # This file
+```
+
+## Available Scripts
+
+- `npm start` - Run the app
+- `npm run fix-chromium` - Download Chromium to project folder
+- `npm run test-setup` - Verify everything is configured correctly
+- `npm run build` - Build installer for current platform
+- `npm run package-win` - Build Windows installer
+- `npm run package-all` - Build for Windows, Mac, and Linux
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Chromium installed in wrong location** (e.g., `C:\Users\username\.cache\puppeteer`):
+   - This happens when Puppeteer uses the global cache instead of the project folder
+   - Fix it by running: `npm run fix-chromium`
+   - This will install Chromium to `./chromium-browser` in your project
+   - You should see the chromium-browser folder in your project after this
+   
+   **Manual fix for Windows (PowerShell):**
+   ```powershell
+   $env:PUPPETEER_CACHE_DIR="./chromium-browser"
+   npx puppeteer browsers install chrome
+   ```
+   
+   **Manual fix for Windows (Command Prompt):**
+   ```cmd
+   set PUPPETEER_CACHE_DIR=./chromium-browser
+   npx puppeteer browsers install chrome
+   ```
+
+2. **"WS endpoint URL timeout" error**: 
+   - This usually means Chromium wasn't downloaded properly
+   - Run: `npm run fix-chromium`
+   - Check that the `chromium-browser` folder exists in your project
+   - On Windows, you might need to run the command prompt as Administrator
+   - Try deleting `node_modules` and running `npm install` again
+
+2. **No ads found**: 
+   - Ensure the advertiser has active ads in the selected region
+   - Try a different region or advertiser
+   - Check your internet connection
+
+2. **Timeout errors**:
+   - The tool allows up to 60 seconds for page load
+   - Try reducing the maximum number of screenshots
+   - Check if the transparency center websites are accessible
+
+3. **Screenshot capture fails**:
+   - Some ads may fail to capture due to dynamic loading
+   - The tool will continue capturing other ads
+   - Check the console for specific error messages
+
+## Technical Details
+
+- Built with Electron for cross-platform desktop support
+- Uses Puppeteer for automated browser control with bundled Chromium
+- Chromium is downloaded and bundled within the project for distribution
+- Implements headless browsing for efficiency
+- Generates ZIP files using the archiver library
+
+## Bundled Chromium
+
+This app includes its own Chromium browser, which means:
+- No dependency on user's Chrome installation
+- Consistent behavior across all systems
+- Larger app size (~150MB) due to bundled browser
+- Works offline once installed
+
+The Chromium browser is downloaded during `npm install` and stored in the project folder. When you build the app for distribution, Chromium is included in the package.
+
+## Security Notes
+
+- The application runs entirely locally
+- No data is sent to external servers
+- All screenshots are stored temporarily and cleaned up after ZIP creation
+- Browser automation runs in a sandboxed environment
+
+## License
+
+MIT License - Feel free to modify and distribute as needed.

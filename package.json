@@ -1,0 +1,63 @@
+{
+  "name": "ads-transparency-scraper",
+  "version": "1.2.0",
+  "description": "Desktop app to capture screenshots from Facebook and Google Ads Transparency Centers",
+  "main": "main.js",
+  "scripts": {
+    "postinstall": "node scripts/setup-chromium.js",
+    "start": "electron .",
+    "test-setup": "node scripts/test-setup.js",
+    "prebuild": "node scripts/ensure-chromium.js",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never",
+    "fix-chromium": "node scripts/fix-chromium.js",
+    "package-win": "npm run prebuild && npm run build -- --win",
+    "package-all": "npm run prebuild && npm run build -- -mwl"
+  },
+  "keywords": ["electron", "puppeteer", "ads", "screenshot"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "puppeteer": "^22.8.2",
+    "archiver": "^7.0.1"
+  },
+  "build": {
+    "appId": "com.yourcompany.adstransparencyscraper",
+    "productName": "Ads Transparency Scraper",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!**/*.ts",
+      "!*.code-workspace",
+      "!LICENSE.md",
+      "!package-lock.json",
+      "!yarn.lock",
+      "!.git",
+      "!dist",
+      "!chromium-browser",
+      "!scripts/test-*.js",
+      "!scripts/generate-*.js",
+      "!scripts/download-*.js"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/app-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

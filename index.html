@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adspy</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .platform-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .platform-option {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+        
+        .platform-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .platform-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .platform-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        /* Tooltip styles */
+        .info-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 14px;
+            color: #999;
+            cursor: help;
+            transition: color 0.2s ease;
+        }
+        .platform-option.selected .info-icon {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .info-icon:hover {
+            color: #667eea;
+        }
+        .platform-option.selected .info-icon:hover {
+            color: white;
+        }
+        .tooltip {
+            visibility: hidden;
+            width: 220px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 10px;
+            position: absolute;
+            z-index: 100;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+        .info-icon:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .brand-logos {
+            margin: 30px 0;
+            padding: 20px 0;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .powered-by-title {
+            color: #777;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+        
+        .logos-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .brand-logos img {
+            height: 120px;
+            width: auto;
+            max-width: 120px;
+            object-fit: contain;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            filter: grayscale(20%);
+        }
+        
+        .brand-logos a {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        
+        .brand-logos a:hover {
+            transform: scale(1.05);
+        }
+        
+        .brand-logos a:hover img {
+            opacity: 1;
+            filter: grayscale(0%);
+        }
+        
+        @media (max-width: 480px) {
+            .logos-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .brand-logos img {
+                height: 35px;
+            }
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Custom Dropdown Styles */
+        .custom-select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select-trigger {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.3s ease;
+            color: #333;
+        }
+
+        .custom-select-trigger:focus,
+        .custom-select-trigger.active {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .custom-select-trigger .arrow {
+            border: solid #333;
+            border-width: 0 2px 2px 0;
+            display: inline-block;
+            padding: 3px;
+            transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+            transition: transform 0.3s ease;
+        }
+
+        .custom-select-trigger.active .arrow {
+            transform: rotate(-135deg);
+        }
+
+        /* Search input style inside trigger */
+        .custom-select-trigger input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 16px;
+            padding: 0;
+            margin-right: 10px;
+            box-shadow: none; /* Remove any input-specific shadows */
+        }
+        /* Hide selected text when search input is visible */
+        .custom-select-trigger.active #selected-region-text {
+            display: none;
+        }
+        .custom-select-trigger:not(.active) #region-search-input {
+            display: none;
+        }
+
+        .custom-options {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 99;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 5px 0;
+        }
+
+        .custom-options.open {
+            display: block;
+        }
+
+        .custom-option-group-label {
+            font-weight: 600;
+            color: #555;
+            padding: 8px 16px 4px;
+            font-size: 0.9em;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 5px;
+            pointer-events: none;
+        }
+
+        .custom-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease;
+            color: #333;
+        }
+
+        .custom-option:hover {
+            background-color: #f0f0f0;
+        }
+
+        .custom-option.selected {
+            background-color: #e6e6fa;
+            font-weight: 500;
+        }
+        
+        .custom-option.is-favorite {
+            font-weight: 600;
+        }
+
+        .favorite-star {
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-left: 10px;
+            transition: color 0.2s ease;
+            display: inline-block;
+        }
+
+        .favorite-star.active {
+            color: gold;
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .button-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .button-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .button-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+        
+        .button-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #90caf9;
+        }
+        
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #81c784;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Adspy</h1>
+        
+        <div class="platform-selector">
+            <div class="platform-option" data-platform="facebook">
+                <img src="assets/meta.jpg" alt="Meta" class="platform-icon" />
+                <div>Facebook</div>
+                <span class="info-icon" title="Meta uses keywords (e.g., 'Nike') not domains. This may bring ads from various related brands.">?
+                    <span class="tooltip">Meta uses keywords (e.g., 'Nike') not domains. This may bring ads from various related brands.</span>
+                </span>
+            </div>
+            <div class="platform-option" data-platform="google">
+                <img src="assets/google.png" alt="Google" class="platform-icon" />
+                <div>Google</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="region-search-input">Country/Region:</label>
+            <div class="custom-select-wrapper">
+                <div class="custom-select-trigger" id="region-select-trigger" tabindex="0">
+                    <span id="selected-region-text">Select a region...</span>
+                    <input type="text" id="region-search-input" placeholder="Search country..." style="display: none;">
+                    <div class="arrow"></div>
+                </div>
+                <div class="custom-options" id="custom-region-options">
+                    </div>
+            </div>
+            <input type="hidden" id="region" name="region" value="">
+        </div>
+        
+        <div class="form-group">
+            <label for="advertiserUrl">Advertiser Page URL or Name:</label>
+            <input type="text" id="advertiserUrl" placeholder=" Nike or Nike.com. Do not use www or country domains such as .com.ar" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="maxScreenshots">Maximum Screenshots (1-100):</label>
+            <input type="text" id="maxScreenshots" placeholder="50" value="50">
+        </div>
+        
+        <button class="button button-primary" id="captureBtn" disabled>
+            <span id="buttonText">Select a Platform</span>
+        </button>
+        
+        <button class="button button-secondary" id="downloadBtn" style="display: none;">
+            Download ZIP File
+        </button>
+        
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+
+        <div class="brand-logos">
+            <div class="powered-by-title">Powered by</div>
+            <div class="logos-container">
+                <a href="#" class="external-link" data-url="https://hikethecloud.com">
+                    <img src="assets/logo1.png" alt="Brand Logo 1">
+                </a>
+                <a href="#" class="external-link" data-url="https://abndigital.com.ar">
+                    <img src="assets/logo2.png" alt="Brand Logo 2">
+                </a>
+               
+            </div>
+        </div>
+        
+        <div class="status" id="status"></div>
+    </div>
+    
+    <script>
+        // Handle external links for Electron
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle external logo links
+            const externalLinks = document.querySelectorAll('.external-link');
+            
+            externalLinks.forEach(link => {
+                link.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const url = this.getAttribute('data-url');
+                    const companyName = this.querySelector('img').getAttribute('alt');
+                    
+                    // Show confirmation dialog
+                    const userConfirmed = confirm(`Do you want to open ${companyName} website in your default browser?\n\nURL: ${url}`);
+                    
+                    if (userConfirmed) {
+                        try {
+                            const result = await window.electronAPI.openExternalLink(url);
+                            if (!result.success) {
+                                alert(`Failed to open the website: ${result.error || 'Unknown error'}`);
+                            }
+                        } catch (error) {
+                            console.error('Error opening external link:', error);
+                            alert('Failed to open the website. Please try again.');
+                        }
+                    }
+                });
+            });
+            
+            // Prevent any default link behavior globally for external links
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href^="http"]');
+                if (link && link.classList.contains('external-link')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+        });
+    </script>
+    
+    <script src="renderer.js"></script>
+</body>
+</html>
