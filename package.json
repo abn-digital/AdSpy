@@ -1,21 +1,18 @@
 {
   "name": "ads-transparency-scraper",
-  "version": "1.2.0",
+  "version": "BETA 2.0.0",
   "description": "Desktop app to capture screenshots from Facebook and Google Ads Transparency Centers",
   "main": "main.js",
   "scripts": {
-    "postinstall": "node scripts/setup-chromium.js",
     "start": "electron .",
-    "test-setup": "node scripts/test-setup.js",
     "prebuild": "node scripts/ensure-chromium.js",
     "build": "electron-builder",
     "dist": "electron-builder --publish=never",
-    "fix-chromium": "node scripts/fix-chromium.js",
-    "package-win": "npm run prebuild && npm run build -- --win",
-    "package-all": "npm run prebuild && npm run build -- -mwl"
+    "publish-github": "electron-builder --publish=always",
+    "fix-chromium": "node scripts/fix-chromium.js"
   },
-  "keywords": ["electron", "puppeteer", "ads", "screenshot"],
-  "author": "Your Name",
+  "keywords": ["electron", "puppeteer", "ads", "screenshot", "transparency"],
+  "author": "Pedro Karim Nasiff Dumois (Hike the Cloud)",
   "license": "MIT",
   "devDependencies": {
     "electron": "^28.0.0",
@@ -26,7 +23,7 @@
     "archiver": "^7.0.1"
   },
   "build": {
-    "appId": "com.yourcompany.adstransparencyscraper",
+    "appId": "com.hikethecloud.adstransparencyscraper",
     "productName": "Ads Transparency Scraper",
     "directories": {
       "output": "dist"
@@ -43,7 +40,8 @@
       "!chromium-browser",
       "!scripts/test-*.js",
       "!scripts/generate-*.js",
-      "!scripts/download-*.js"
+      "!scripts/download-*.js",
+      "!scripts/setup-chromium.js"  
     ],
     "win": {
       "target": "nsis",
@@ -58,6 +56,15 @@
     },
     "linux": {
       "target": "AppImage"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Pepii2",
+        "repo": "AdSpy",
+        "private": false,
+        "token": "${GH_TOKEN}"
+      }
+    ]
   }
 }
