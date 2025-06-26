@@ -1,10 +1,9 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, autoUpdater } = require('electron'); // Add autoUpdater
 const path = require('path');
-const fs = require('fs');
 const fsPromises = require('fs').promises;
-const { captureScreenshots_ } = require('./screenshotCapture');
 const archiver = require('archiver');
-const { ensureChromium } = require('./scripts/ensure-chromium');
+const { captureScreenshots_ } = require('./screenshotCapture');
+const { ensureChromium } = require('./scripts/ensure-chromium'); // Keep this line if you use ensureChromium
 
 // Set Puppeteer cache directory
 process.env.PUPPETEER_CACHE_DIR = path.join(__dirname, 'chromium-browser');
@@ -16,7 +15,7 @@ if (app.isPackaged) {
 
 let mainWindow;
 
-const createWindow_ = () => { //
+const createWindow_ = () => {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 700,
@@ -36,7 +35,7 @@ const createWindow_ = () => { //
   }
 };
 
-app.whenReady().then(async () => { //
+app.whenReady().then(async () => {
   // Only check for Chromium in development mode
   if (!app.isPackaged) {
     console.log('Development mode - checking for Chromium...');
@@ -58,14 +57,85 @@ app.whenReady().then(async () => { //
   
   createWindow_();
 
-  app.on('activate', () => { //
+  app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow_();
     }
   });
+
+  // --- Auto-update Implementation ---
+  if (app.isPackaged) { // Only enable auto-updates in packaged builds
+    const owner = 'Pepii2'; // Replace with your GitHub username or org
+    const repo = 'AdSpy';     // Replace with your GitHub repository name
+    const server = `https://github.com/${owner}/${repo}`;
+    // The feed URL needs to point to the latest release artifacts
+    // For electron-builder with GitHub, it's typically just the repo URL for latest
+    autoUpdater.setFeedURL({ url: server }); 
+    console.log('AutoUpdater feed URL set to:', server);
+
+    // Initial check for updates when the app starts
+    console.log('Checking for updates on app startup...');
+    autoUpdater.checkForUpdates();
+
+    // Listeners for autoUpdater events
+    autoUpdater.on('checking-for-update', () => {
+      console.log('Checking for update...');
+      // Optionally send a message to the renderer process
+      // mainWindow.webContents.send('update-message', 'Checking for updates...');
+    });
+
+    autoUpdater.on('update-available', () => {
+      console.log('Update available. Downloading...');
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Update Available',
+        message: 'A new version is available. Downloading now...',
+        buttons: ['OK']
+      });
+      // Optionally send a message to the renderer process
+      // mainWindow.webContents.send('update-message', 'Update available. Downloading...');
+    });
+
+    autoUpdater.on('update-not-available', () => {
+      console.log('Update not available.');
+      // Optionally send a message to the renderer process
+      // mainWindow.webContents.send('update-message', 'No updates available.');
+    });
+
+    autoUpdater.on('error', (message) => {
+      console.error('There was a problem updating the application:', message);
+      dialog.showErrorBox('Update Error', `Could not update the application: ${message}`);
+      // Optionally send an error message to the renderer process
+      // mainWindow.webContents.send('update-message', `Update error: ${message}`);
+    });
+
+    autoUpdater.on('download-progress', (progressObj) => {
+      let log_message = "Download speed: " + progressObj.bytesPerSecond;
+      log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+      log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+      console.log(log_message);
+      // Optionally send progress to renderer for a download bar
+      // mainWindow.webContents.send('download-progress', progressObj.percent);
+    });
+
+    autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+      console.log('Update downloaded:', releaseName);
+      const dialogOpts = {
+        type: 'info',
+        buttons: ['Restart', 'Later'],
+        title: 'Application Update',
+        message: process.platform === 'win32' ? releaseNotes : releaseName,
+        detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+      };
+
+      dialog.showMessageBox(mainWindow, dialogOpts).then((returnValue) => {
+        if (returnValue.response === 0) autoUpdater.quitAndInstall();
+      });
+    });
+  } // End of if (app.isPackaged) for auto-updates
 });
 
-app.on('window-all-closed', () => { //
+app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -115,7 +185,7 @@ ipcMain.handle('capture-screenshots', async (event, options) => {
         await fsPromises.writeFile(filepath, item.data);
         screenshotCount++;
       } else if (item.type === 'video') {
-        const filename = item.filename;
+        const filename = item.filename; // Use the filename generated in screenshotCapture.js
         filepath = path.join(tempDir, filename);
         await fsPromises.writeFile(filepath, item.htmlContent);
         videoCount++;
@@ -139,9 +209,9 @@ ipcMain.handle('capture-screenshots', async (event, options) => {
     return {
       success: true,
       zipBuffer: zipBuffer,
-      screenshotCount: screenshotCount,
-      videoCount: videoCount,
-      totalCount: capturedData.length
+      screenshotCount: screenshotCount, // Return actual screenshot count
+      videoCount: videoCount, // Return actual video count
+      totalCount: capturedData.length // Return total captured items
     };
   } catch (error) {
     console.error('Error in capture-screenshots:', error);
@@ -153,7 +223,7 @@ ipcMain.handle('capture-screenshots', async (event, options) => {
 });
 
 // Handle save dialog
-ipcMain.handle('save-zip-file', async (event, buffer) => { //
+ipcMain.handle('save-zip-file', async (event, buffer) => {
   try {
     const result = await dialog.showSaveDialog(mainWindow, {
       defaultPath: `ads-captures-${new Date().toISOString().split('T')[0]}.zip`,
@@ -175,7 +245,7 @@ ipcMain.handle('save-zip-file', async (event, buffer) => { //
 });
 
 // Handle external link opening
-ipcMain.handle('open-external-link', async (event, url) => { //
+ipcMain.handle('open-external-link', async (event, url) => {
   try {
     await shell.openExternal(url);
     return { success: true };
@@ -185,7 +255,7 @@ ipcMain.handle('open-external-link', async (event, url) => { //
   }
 });
 
-const createZipFile_ = (filePaths, zipPath) => { //
+const createZipFile_ = (filePaths, zipPath) => {
   return new Promise((resolve, reject) => {
     const output = require('fs').createWriteStream(zipPath);
     const archive = archiver('zip', {
@@ -211,7 +281,7 @@ const createZipFile_ = (filePaths, zipPath) => { //
   });
 };
 
-const cleanupTempFiles_ = async (tempDir, zipPath) => { //
+const cleanupTempFiles_ = async (tempDir, zipPath) => {
   try {
     // Remove temp directory and its contents
     await fsPromises.rm(tempDir, { recursive: true, force: true });
